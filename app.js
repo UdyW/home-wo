@@ -23,12 +23,25 @@
         if (s && Array.isArray(s.workouts) && s.workouts.length) {
           s.sessions = s.sessions || [];
           s.drafts = s.drafts || {};
+          migrate(s);
           return s;
         }
       }
     } catch (e) { /* fall through to defaults */ }
-    return { workouts: clone(window.DEFAULT_WORKOUTS), sessions: [], drafts: {} };
+    return { workouts: clone(window.DEFAULT_WORKOUTS), sessions: [], drafts: {}, planVersion: window.DEFAULT_PLAN_VERSION || 1 };
   }
+  // Adds default workout days the user doesn't have yet. Never changes days they already have.
+  function migrate(s) {
+    var target = window.DEFAULT_PLAN_VERSION || 1;
+    if ((s.planVersion || 1) >= target) return;
+    var have = {};
+    s.workouts.forEach(function (w) { have[w.id] = true; });
+    window.DEFAULT_WORKOUTS.forEach(function (w) { if (!have[w.id]) s.workouts.push(clone(w)); });
+    s.planVersion = target;
+    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* saved on next change */ }
+  }
+  function weekOrder(w) { return w.weekday === "" || w.weekday == null ? 99 : (Number(w.weekday) + 6) % 7; }
+  function orderedWorkouts() { return state.workouts.slice().sort(function (a, b) { return weekOrder(a) - weekOrder(b); }); }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
     catch (e) { toast("Couldn't save on this device. Export a backup from Edit plan."); }
@@ -67,16 +80,17 @@
     });
     return d;
   }
-  function unitWord(ex) { return ex.unit === "sec" ? "sec" : "reps"; }
+  function unitWord(ex) { return ex.unit === "sec" ? "sec" : ex.unit === "min" ? "min" : "reps"; }
 
   // ---------- day bar & nav ----------
   function renderDaybar() {
     var bar = $("#daybar");
     if (view === "history") { bar.innerHTML = ""; return; }
-    bar.innerHTML = state.workouts.map(function (w) {
-      var sel = w.id === currentId;
-      return '<button role="tab" data-day="' + esc(w.id) + '" aria-selected="' + sel + '">' +
-        esc(w.dayLabel || w.title) + "</button>";
+    bar.innerHTML = orderedWorkouts().map(function (w) {
+      var sel = w.id === currentId, name = w.dayLabel || w.title || "Day";
+      var short = /day$/i.test(name) ? name.slice(0, 3) : name;
+      return '<button role="tab" data-day="' + esc(w.id) + '" aria-selected="' + sel + '" aria-label="' + esc(name) + '"' +
+        (Number(w.weekday) === today && w.weekday !== "" ? ' class="is-today"' : "") + ">" + esc(short) + "</button>";
     }).join("");
   }
   function render() {
@@ -90,17 +104,22 @@
   }
 
   // ---------- workout (logging) ----------
-  // Two movement photos per exercise: images/<exercise id>-1.jpg (start) and -2.jpg (finish).
-  // A frame shows a placeholder until its photo exists.
-  function moves(ex) {
-    return '<div class="moves">' + ["Start", "Finish"].map(function (label, i) {
-      return '<figure class="frame missing"><img src="images/' + encodeURIComponent(ex.id) + "-" + (i + 1) + '.jpg" alt="' +
-        esc(ex.name) + ", " + label.toLowerCase() + ' position" loading="lazy">' +
-        "<figcaption>" + label + "</figcaption></figure>";
-    }).join("") + "</div>";
+  function renderRestDay(w) {
+    var h = '<section class="hero"><p class="day">' + esc(w.dayLabel) + "</p><h2>" + esc(w.title) + "</h2>" +
+      '<p class="sub">' + esc(w.summary) + "</p></section>";
+    if (w.warmup && w.warmup.length) {
+      h += '<div class="closing"><p><b>Gentle options for today</b></p><ul class="warm">' +
+        w.warmup.map(function (r) { return "<li><b>" + esc(r[0]) + " (" + esc(r[1]) + ")</b><span>" + esc(r[2] || "") + "</span></li>"; }).join("") +
+        "</ul></div>";
+    }
+    var next = orderedWorkouts().filter(function (x) { return !x.restDay && x.exercises.length; })[0];
+    if (next) h += '<p class="empty">Nothing to log today. Your week starts again with ' + esc(next.dayLabel) + " " + esc(next.title) + ".</p>";
+    app.innerHTML = h;
   }
   function renderToday() {
-    var w = W(); var d = getDraft(w);
+    var w = W();
+    if (w.restDay) { renderRestDay(w); return; }
+    var d = getDraft(w);
     var total = 0, done = 0, dots = "";
     w.exercises.forEach(function (ex) {
       d.entries[ex.id].forEach(function (s) { total++; if (s.done) done++; dots += '<i class="' + (s.done ? "on" : "") + '"></i>'; });
@@ -126,21 +145,25 @@
         lastTxt = '<p class="last">Last time: ' + (kgs.length ? esc(kgs[0]) + " kg, " : "") +
           doneSets.map(function (s) { return esc(s.reps); }).join(", ") + " " + unitWord(ex) + "</p>";
         var hitAll = last.sets.length >= ex.sets && last.sets.every(function (s) { return s.done && Number(s.reps) >= Number(ex.target); });
-        if (hitAll) hint = '<p class="hint">Every set hit target last time. Try 1\u20132 more ' + unitWord(ex) + " or the next weight.</p>";
+        if (hitAll && ex.unit !== "min") hint = '<p class="hint">Every set hit target last time. Try 1\u20132 more ' + unitWord(ex) + " or the next weight.</p>";
       }
       h += '<article class="ex" data-ex="' + esc(ex.id) + '"><header><span class="num">' + (i + 1) + "</span><div>" +
         "<h3>" + esc(ex.name) + "</h3>" +
-        '<p class="meta">' + ex.sets + " \u00d7 " + esc(ex.label || ex.target) + ", " + ex.rest + " s rest. " + esc(ex.equipment || "") + "</p>" +
+        '<p class="meta">' + (ex.sets > 1 ? ex.sets + " \u00d7 " : "") + esc(ex.label || ex.target) + (Number(ex.rest) ? ", " + ex.rest + " s rest" : "") + ". " + esc(ex.equipment || "") + "</p>" +
         "</div></header>" + lastTxt + hint + '<div class="sets">';
       sets.forEach(function (s, j) {
-        h += '<div class="set"><span class="n">Set ' + (j + 1) + "</span>" +
-          '<label><input inputmode="decimal" data-f="kg" data-i="' + j + '" value="' + esc(s.kg) + '" placeholder="\u2013" aria-label="Set ' + (j + 1) + ' weight in kg"><span>kg</span></label>' +
+        var setName = ex.sets > 1 ? "Set " + (j + 1) : (ex.unit === "min" ? "Done" : "Set 1");
+        h += '<div class="set' + (ex.weighted === false ? " noweight" : "") + '"><span class="n">' + setName + "</span>" +
+          (ex.weighted === false ? "" :
+          '<label><input inputmode="decimal" data-f="kg" data-i="' + j + '" value="' + esc(s.kg) + '" placeholder="\u2013" aria-label="Set ' + (j + 1) + ' weight in kg"><span>kg</span></label>') +
           '<label><input inputmode="numeric" data-f="reps" data-i="' + j + '" value="' + esc(s.reps) + '" aria-label="Set ' + (j + 1) + " " + unitWord(ex) + '"><span>' + unitWord(ex) + "</span></label>" +
           '<button class="plate' + (s.done ? " on" : "") + '" data-action="toggle" data-i="' + j + '" aria-pressed="' + s.done + '" aria-label="Mark set ' + (j + 1) + ' done"></button></div>';
       });
       h += "</div>";
-      h += '<details class="cue"><summary>How to do it</summary>' + moves(ex) + (ex.cue ? "<p>" + esc(ex.cue) + "</p>" : "") +
-        (ex.start ? "<p><b>Suggested start:</b> " + esc(ex.start) + "</p>" : "") + "</details>";
+      if (ex.cue || ex.start) {
+        h += '<details class="cue"><summary>How to do it</summary>' + (ex.cue ? "<p>" + esc(ex.cue) + "</p>" : "") +
+          (ex.start ? "<p><b>Suggested start:</b> " + esc(ex.start) + "</p>" : "") + "</details>";
+      }
       h += "</article>";
     });
 
@@ -215,7 +238,8 @@
       '<div class="grid">' + field("Day name", 'data-wf="dayLabel"', w.dayLabel) + field("Title", 'data-wf="title"', w.title) +
       '<label class="field"><span>Opens automatically on</span><select data-wf="weekday"><option value="">No day</option>' +
       days.map(function (d, i) { return '<option value="' + i + '"' + (String(w.weekday) === String(i) ? " selected" : "") + ">" + d + "</option>"; }).join("") +
-      "</select></label></div>" +
+      "</select></label>" +
+      '<label class="field"><span>Type of day</span><select data-wf="restDay"><option value="no"' + (!w.restDay ? " selected" : "") + '>Training day</option><option value="yes"' + (w.restDay ? " selected" : "") + ">Rest day (nothing to log)</option></select></label></div>" +
       field("Summary", 'data-wf="summary"', w.summary) +
       field("Warm-up (one per line: movement | amount | note)", 'data-wf="warmup"', (w.warmup || []).map(function (r) { return r.join(" | "); }).join("\n"), "textarea") +
       field("Finisher", 'data-wf="finisher"', w.finisher) + field("Cool-down", 'data-wf="cooldown"', w.cooldown);
@@ -229,7 +253,8 @@
         '<button class="btn small danger" data-action="delex" data-x="' + esc(ex.id) + '">Remove</button></div>' +
         field("Name", a + '"name"', ex.name) +
         '<div class="grid">' + field("Sets", a + '"sets"', ex.sets, "number") + field("Target reps or seconds", a + '"target"', ex.target, "number") +
-        '<label class="field"><span>Counted in</span><select ' + a + '"unit"><option value="reps"' + (ex.unit !== "sec" ? " selected" : "") + '>Reps</option><option value="sec"' + (ex.unit === "sec" ? " selected" : "") + ">Seconds</option></select></label>" +
+        '<label class="field"><span>Counted in</span><select ' + a + '"unit"><option value="reps"' + (ex.unit !== "sec" ? " selected" : "") + '>Reps</option><option value="sec"' + (ex.unit === "sec" ? " selected" : "") + '>Seconds</option><option value="min"' + (ex.unit === "min" ? " selected" : "") + ">Minutes</option></select></label>" +
+        '<label class="field"><span>Weight box</span><select ' + a + '"weighted"><option value="yes"' + (ex.weighted !== false ? " selected" : "") + '>Show kg</option><option value="no"' + (ex.weighted === false ? " selected" : "") + ">No weight</option></select></label>" +
         field("Rest (seconds)", a + '"rest"', ex.rest, "number") + "</div>" +
         '<div class="grid">' + field("Shown as", a + '"label"', ex.label) + field("Equipment", a + '"equipment"', ex.equipment) + "</div>" +
         field("Suggested start", a + '"start"', ex.start) + field("How to do it", a + '"cue"', ex.cue, "textarea") + "</div>";
@@ -338,16 +363,11 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     } else if (act === "resetplan") {
-      if (confirm("Restore the original Monday and Friday plan? Your history is kept; your edits to the plan are lost.")) {
-        state.workouts = clone(window.DEFAULT_WORKOUTS); state.drafts = {}; currentId = state.workouts[0].id; save(); render();
+      if (confirm("Restore the original weekly plan? Your history is kept; your edits to the plan are lost.")) {
+        state.workouts = clone(window.DEFAULT_WORKOUTS); state.drafts = {}; state.planVersion = window.DEFAULT_PLAN_VERSION || 1; currentId = state.workouts[0].id; save(); render();
       }
     }
   });
-
-  // load doesn't bubble, so listen in the capture phase.
-  app.addEventListener("load", function (e) {
-    if (e.target.tagName === "IMG" && e.target.parentNode.classList.contains("frame")) e.target.parentNode.classList.remove("missing");
-  }, true);
 
   app.addEventListener("input", function (e) {
     var t = e.target, w = W();
@@ -376,13 +396,16 @@
       if (k === "warmup") {
         w.warmup = t.value.split("\n").map(function (l) { return l.split("|").map(function (p) { return p.trim(); }); })
           .filter(function (r) { return r[0]; }).map(function (r) { return [r[0], r[1] || "", r[2] || ""]; });
-      } else { w[k] = t.value; }
+      } else if (k === "restDay") { w.restDay = t.value === "yes"; }
+      else { w[k] = t.value; }
       save(); if (k === "dayLabel") renderDaybar();
     } else if (t.dataset.xf) {
       var ex = w.exercises.find(function (x) { return x.id === t.dataset.x; }); if (!ex) return;
       var f = t.dataset.xf, v = t.value;
       if (f === "sets" || f === "target" || f === "rest") { v = Math.max(f === "sets" ? 1 : 0, parseInt(v, 10) || 0); }
+      if (f === "weighted") v = v !== "no";
       ex[f] = v; save();
+      if (f === "weighted") return;
       if (f === "name") render();
     } else if (t.hasAttribute("data-import") && t.files[0]) {
       var r = new FileReader();
@@ -391,7 +414,8 @@
           var s = JSON.parse(r.result);
           if (!s || !Array.isArray(s.workouts) || !s.workouts.length) throw new Error("bad");
           if (!confirm("Replace everything on this device with the backup?")) return;
-          state = { workouts: s.workouts, sessions: s.sessions || [], drafts: s.drafts || {} };
+          state = { workouts: s.workouts, sessions: s.sessions || [], drafts: s.drafts || {}, planVersion: s.planVersion || 1 };
+          migrate(state);
           currentId = state.workouts[0].id; save(); render(); toast("Backup imported");
         } catch (err) { toast("That file isn't a Home gym log backup."); }
       };
