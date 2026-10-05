@@ -35,3 +35,4 @@ On your phone, open the link and use "Add to Home Screen" so it opens like an ap
 ## Your data
 
 Everything is saved in your browser on that device. It is not uploaded anywhere. Clearing browser data erases it, and your phone and laptop won't share it automatically. Use **Edit plan, Export backup** regularly, and **Import backup** to move your log to another device.
+foo
