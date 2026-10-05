@@ -104,6 +104,15 @@
   }
 
   // ---------- workout (logging) ----------
+  // Two movement photos per exercise: images/<exercise id>-1.jpg (start) and -2.jpg (finish).
+  // A frame shows a placeholder until its photo exists.
+  function moves(ex) {
+    return '<div class="moves">' + ["Start", "Finish"].map(function (label, i) {
+      return '<figure class="frame missing"><img src="images/' + encodeURIComponent(ex.id) + "-" + (i + 1) + '.jpg" alt="' +
+        esc(ex.name) + ", " + label.toLowerCase() + ' position" loading="lazy">' +
+        "<figcaption>" + label + "</figcaption></figure>";
+    }).join("") + "</div>";
+  }
   function renderRestDay(w) {
     var h = '<section class="hero"><p class="day">' + esc(w.dayLabel) + "</p><h2>" + esc(w.title) + "</h2>" +
       '<p class="sub">' + esc(w.summary) + "</p></section>";
@@ -160,10 +169,8 @@
           '<button class="plate' + (s.done ? " on" : "") + '" data-action="toggle" data-i="' + j + '" aria-pressed="' + s.done + '" aria-label="Mark set ' + (j + 1) + ' done"></button></div>';
       });
       h += "</div>";
-      if (ex.cue || ex.start) {
-        h += '<details class="cue"><summary>How to do it</summary>' + (ex.cue ? "<p>" + esc(ex.cue) + "</p>" : "") +
-          (ex.start ? "<p><b>Suggested start:</b> " + esc(ex.start) + "</p>" : "") + "</details>";
-      }
+      h += '<details class="cue"><summary>How to do it</summary>' + moves(ex) + (ex.cue ? "<p>" + esc(ex.cue) + "</p>" : "") +
+        (ex.start ? "<p><b>Suggested start:</b> " + esc(ex.start) + "</p>" : "") + "</details>";
       h += "</article>";
     });
 
@@ -368,6 +375,11 @@
       }
     }
   });
+
+  // load doesn't bubble, so listen in the capture phase.
+  app.addEventListener("load", function (e) {
+    if (e.target.tagName === "IMG" && e.target.parentNode.classList.contains("frame")) e.target.parentNode.classList.remove("missing");
+  }, true);
 
   app.addEventListener("input", function (e) {
     var t = e.target, w = W();

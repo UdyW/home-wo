@@ -1,0 +1,6 @@
+.git
+.claude
+.DS_Store
+.vercel
+node_modules
+home-gym-backup-*.json

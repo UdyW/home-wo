@@ -26,6 +26,14 @@ A small, phone-friendly app to follow your weekly training plan (three strength 
 
 On your phone, open the link and use "Add to Home Screen" so it opens like an app.
 
+## Run it locally with Docker
+
+1. Install Docker Desktop.
+2. In a terminal, open this folder and run `docker compose up -d --build`.
+3. Open http://localhost:8080.
+
+Edits to the files show up when you refresh the page. Run `docker compose down` to stop it.
+
 ## How it works
 
 - **Workout**: today's day opens automatically (underlined in the day bar). Enter kg and reps, or minutes for walks, and tap the plate to mark a set done. A rest timer starts automatically. Finish the session to save it. Sunday is a rest day with gentle suggestions and nothing to log.
