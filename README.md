@@ -1,13 +1,13 @@
 # Home gym log
 
-A small, phone-friendly app to follow your Monday and Friday workouts, log weight and reps for each set, run rest timers, and see your progress over time. No build step, no server, no account.
+A small, phone-friendly app to follow your weekly training plan (three strength days, three walking and cardio days, and a rest day), log weight and reps for each set, run rest timers, and see your progress over time. No build step, no server, no account.
 
 ## Files
 
 - `index.html` — the page
 - `styles.css` — the look
 - `app.js` — logging, history, editing, rest timer, backup
-- `data.js` — your workout plan (Monday Strength A and Friday Strength C). You can also edit the plan inside the app.
+- `data.js` — your weekly plan, Monday to Sunday. You can also edit the plan inside the app.
 
 ## Put it on Vercel
 
@@ -28,11 +28,10 @@ On your phone, open the link and use "Add to Home Screen" so it opens like an ap
 
 ## How it works
 
-- **Workout**: tap a day, enter kg and reps, tap the plate to mark a set done. A rest timer starts automatically. Finish the session to save it.
+- **Workout**: today's day opens automatically (underlined in the day bar). Enter kg and reps, or minutes for walks, and tap the plate to mark a set done. A rest timer starts automatically. Finish the session to save it. Sunday is a rest day with gentle suggestions and nothing to log.
 - **History**: your top weight per exercise over time, and every session you've saved.
-- **Edit plan**: change exercises, sets, reps, rest, cues; add a Wednesday or any other day.
+- **Edit plan**: change exercises, sets, reps, minutes, rest and cues; add or remove days; mark a day as a rest day.
 
 ## Your data
 
 Everything is saved in your browser on that device. It is not uploaded anywhere. Clearing browser data erases it, and your phone and laptop won't share it automatically. Use **Edit plan, Export backup** regularly, and **Import backup** to move your log to another device.
-foo

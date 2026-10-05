@@ -24,7 +24,6 @@ The user is a beginner lifter training at home. They aren't a professional devel
 | `styles.css` | All styling. Colour and font tokens are on `:root`, with a dark-mode override via `prefers-color-scheme`. |
 | `app.js` | All logic in one IIFE: storage, rendering of the three views, event delegation, rest timer, backup import/export. |
 | `data.js` | `window.DEFAULT_WORKOUTS`: the starting plan, used on first load and by "Restore original plan". |
-| `images/` | Two movement photos per exercise, `<exercise id>-1.jpg` (start) and `-2.jpg` (finish). Missing photos show a placeholder. `images/README.md` lists the filenames. |
 | `README.md` | User-facing setup and usage notes. |
 | `.claude/skills/home-workout-plan/SKILL.md` | Training rules for writing or changing workouts (equipment, progression, safety). Use it for any change to exercises or `data.js`. |
 
@@ -33,6 +32,7 @@ The user is a beginner lifter training at home. They aren't a professional devel
 ```js
 // localStorage["homegym-v1"]
 {
+  planVersion: 2,        // compared with window.DEFAULT_PLAN_VERSION in data.js
   workouts: [Workout],
   sessions: [Session],   // finished workouts, any order (sorted by date when read)
   drafts: { [workoutId]: Draft }  // in-progress entries, one per workout
@@ -40,7 +40,8 @@ The user is a beginner lifter training at home. They aren't a professional devel
 
 Workout = {
   id: "mon",                 // permanent
-  weekday: 1,                // 0 = Sunday ... 6 = Saturday; "" = none. Opens automatically on that day.
+  weekday: 1,                // 0 = Sunday ... 6 = Saturday; "" = none. Opens automatically on that day; the day bar is ordered Monday to Sunday.
+  restDay: false,            // true = shows warmup items as gentle suggestions, nothing to log
   dayLabel: "Monday",
   title: "Strength A",
   summary: "One-line description",
@@ -55,8 +56,9 @@ Exercise = {
   name: "Barbell hip thrust",
   equipment: "Bench, barbell, towel or pad",
   sets: 3,
-  target: 10,                // number of reps, or seconds when unit is "sec"
-  unit: "reps" | "sec",
+  target: 10,                // number of reps, seconds ("sec") or minutes ("min")
+  unit: "reps" | "sec" | "min",
+  weighted: false,           // optional; false hides the kg box (bodyweight moves, walks)
   label: "10 per leg",       // display text for the target
   rest: 90,                  // seconds; starts the rest timer when a set is marked done
   start: "Suggested starting weight",
@@ -70,12 +72,12 @@ Set     = { kg: "20" | "", reps: 10, done: true }   // kg and reps are stored as
 
 ## Important gotcha: editing `data.js`
 
-`data.js` is only read when there's no saved state, or when the user taps **Edit plan, Restore original plan**. Restoring replaces the whole plan and wipes their in-app edits (history is kept). So after changing `data.js`, tell the user one of these:
+The user's saved plan lives in `localStorage`, so changes to `data.js` don't simply replace it. What reaches the user depends on the kind of change:
 
-1. They can add the change themselves in the **Edit plan** tab (keeps their edits), or
-2. They can tap **Restore original plan** to load the new defaults (loses their plan edits).
+- **New workout day (new `id`)**: increase `window.DEFAULT_PLAN_VERSION` by 1. On next load, `migrate()` in `app.js` adds any default day whose `id` the user doesn't have yet. Existing days, edits and history are untouched.
+- **Changes to an existing day** (new exercise, different sets, new cue): these don't reach existing users automatically. Tell the user to either make the same change in **Edit plan** (keeps their edits), or tap **Restore original plan** (loads the new defaults; their plan edits are lost, history is kept).
 
-If a change must reach existing users automatically, add a versioned migration in `load()` that merges new workouts or exercises in by `id`, without touching existing ones.
+If changes to existing days ever need to reach users automatically, extend `migrate()` to merge by exercise `id` without overwriting fields the user has edited.
 
 ## Code conventions
 
