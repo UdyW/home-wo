@@ -24,6 +24,7 @@ The user is a beginner lifter training at home. They aren't a professional devel
 | `styles.css` | All styling. Colour and font tokens are on `:root`, with a dark-mode override via `prefers-color-scheme`. |
 | `app.js` | All logic in one IIFE: storage, rendering of the three views, event delegation, rest timer, backup import/export. |
 | `data.js` | `window.DEFAULT_WORKOUTS`: the starting plan, used on first load and by "Restore original plan". |
+| `images/` | Two movement photos per exercise, `<exercise id>-1.jpg` (start) and `-2.jpg` (finish). Missing photos show a placeholder. `images/README.md` lists the filenames. |
 | `README.md` | User-facing setup and usage notes. |
 | `.claude/skills/home-workout-plan/SKILL.md` | Training rules for writing or changing workouts (equipment, progression, safety). Use it for any change to exercises or `data.js`. |
 
