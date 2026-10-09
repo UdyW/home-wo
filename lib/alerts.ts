@@ -63,8 +63,8 @@ export function restDone() {
   }
   if (document.hidden && "Notification" in window && Notification.permission === "granted") {
     const opts = { body: "Rest done. Time for your next set.", tag: "rest-timer", renotify: true } as NotificationOptions;
-    if (swReg) swReg.showNotification("Home gym log", opts);
-    else { try { new Notification("Home gym log", opts); } catch { /* not supported here */ } }
+    if (swReg) swReg.showNotification("Pram's home gym log", opts);
+    else { try { new Notification("Pram's home gym log", opts); } catch { /* not supported here */ } }
   }
   releaseWakeLock();
 }
