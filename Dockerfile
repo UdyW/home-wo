@@ -1,7 +1,12 @@
-# Serves the app as static files, the same way Vercel does. No build step.
+# Builds the static site, then serves it with nginx, the same files Vercel serves.
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
 FROM nginx:1.27-alpine
-
-COPY index.html styles.css app.js data.js sw.js /usr/share/nginx/html/
-COPY images/ /usr/share/nginx/html/images/
-
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/out /usr/share/nginx/html
 EXPOSE 80

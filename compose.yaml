@@ -3,11 +3,4 @@ services:
     build: .
     ports:
       - "8080:80"
-    # Live edits: changes to the files show up after a browser refresh, no rebuild needed.
-    volumes:
-      - ./index.html:/usr/share/nginx/html/index.html:ro
-      - ./styles.css:/usr/share/nginx/html/styles.css:ro
-      - ./app.js:/usr/share/nginx/html/app.js:ro
-      - ./data.js:/usr/share/nginx/html/data.js:ro
-      - ./sw.js:/usr/share/nginx/html/sw.js:ro
-      - ./images:/usr/share/nginx/html/images:ro
+    # Serves the built app. For live editing, use `npm run dev` instead.
