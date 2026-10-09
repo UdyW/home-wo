@@ -279,31 +279,48 @@
 
   // ---------- timer ----------
   var tEnd = 0, tTotal = 0, tInt = null, tHide = null;
-  var audio = null, swReg = null;
+  var alarm = null, alarmReady = false, wakeLock = null, swReg = null;
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     navigator.serviceWorker.register("sw.js").then(function (r) { swReg = r; }).catch(function () {});
   }
-  // Called from a tap, because phones only allow sound and permission prompts after one.
+  // Three short beeps as a WAV file made in the browser (no download).
+  // An <audio> element still plays when an iPhone's silent switch is on; Web Audio doesn't.
+  function makeBeepUrl() {
+    var rate = 22050, n = Math.round(rate * 0.8), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    function str(o, t) { for (var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
+    str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVEfmt "); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, n * 2, true);
+    for (var i = 0; i < n; i++) {
+      var t = i / rate, p = t % 0.3, on = p < 0.18;
+      var env = on ? Math.min(1, p / 0.01, (0.18 - p) / 0.01) : 0;
+      v.setInt16(44 + i * 2, (Math.sin(2 * Math.PI * 880 * t) > 0 ? 1 : -1) * env * 9000, true);
+    }
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  }
+  // Called from a tap, because phones only allow sound, wake lock and permission prompts after one.
   function prepareAlerts() {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (!audio && AC) audio = new AC();
-    if (audio && audio.state === "suspended") audio.resume();
+    if (!alarm) { alarm = new Audio(makeBeepUrl()); alarm.preload = "auto"; }
+    if (!alarmReady) {
+      // A silent play inside the tap unlocks the element so it can beep later on its own.
+      alarm.muted = true;
+      var pr = alarm.play();
+      if (pr && pr.then) pr.then(function () { alarm.pause(); alarm.currentTime = 0; alarm.muted = false; alarmReady = true; }).catch(function () { alarm.muted = false; });
+      else { alarm.pause(); alarm.muted = false; alarmReady = true; }
+    }
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
+    // Keep the screen on during the rest, so the phone doesn't pause the page.
+    if (navigator.wakeLock && !wakeLock) {
+      navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; l.addEventListener("release", function () { wakeLock = null; }); }).catch(function () {});
+    }
   }
+  function releaseWakeLock() { if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; } }
   function beep() {
-    if (!audio) return;
-    var now = audio.currentTime;
-    [0, 0.3, 0.6].forEach(function (d) {
-      var o = audio.createOscillator(), g = audio.createGain();
-      o.type = "square"; o.frequency.value = 880;
-      g.gain.setValueAtTime(0.0001, now + d);
-      g.gain.exponentialRampToValueAtTime(0.3, now + d + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.2);
-      o.connect(g); g.connect(audio.destination);
-      o.start(now + d); o.stop(now + d + 0.22);
-    });
+    if (!alarm) return;
+    alarm.muted = false; alarm.currentTime = 0;
+    var pr = alarm.play(); if (pr && pr.catch) pr.catch(function () {});
   }
   function notifyDone() {
     if (!document.hidden || !("Notification" in window) || Notification.permission !== "granted") return;
@@ -327,18 +344,21 @@
       clearInterval(tInt); tInt = null;
       $("#tlabel").textContent = "Rest done. Next set";
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      beep(); notifyDone();
+      beep(); notifyDone(); releaseWakeLock();
       tHide = setTimeout(function () { $("#timer").hidden = true; }, 5000);
     }
   }
   // Phones pause the page in the background; finish the timer as soon as it's back.
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && tInt) tick();
+    if (document.hidden || !tInt) return;
+    tick();
+    if (tInt) prepareAlerts(); // the phone drops the screen wake lock when you leave
+
   });
   $("#timer").addEventListener("click", function (e) {
     var t = e.target.dataset.t;
     if (t === "add") { tEnd += 15000; tTotal += 15; clearInterval(tInt); clearTimeout(tHide); tInt = setInterval(tick, 250); tick(); }
-    if (t === "skip") { clearInterval(tInt); tInt = null; $("#timer").hidden = true; }
+    if (t === "skip") { clearInterval(tInt); tInt = null; releaseWakeLock(); $("#timer").hidden = true; }
   });
 
   var toastT;
