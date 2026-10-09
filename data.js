@@ -3,6 +3,8 @@
 // weighted: false hides the kg box. restDay: true shows a rest-day page with no logging.
 // Bump DEFAULT_PLAN_VERSION when you add new workout days: the app then adds any day
 // whose id it doesn't have yet, without touching days the user already has.
+// Cable machine (MH 90 kg home gym) approximate stack weights, from the manual:
+// high pulley plate 1 = 6 kg, 2 = 9 kg, 3 = 12 kg; low pulley plate 1 = 5 kg, 2 = 9 kg.
 window.DEFAULT_PLAN_VERSION = 2;
 window.DEFAULT_WORKOUTS = [
   {
@@ -12,12 +14,12 @@ window.DEFAULT_WORKOUTS = [
     title: "Strength A",
     summary: "Glutes, legs and push, plus a core block. About 75\u201385 minutes.",
     warmup: [
-      ["Marching on the spot with arm swings", "4 min", "Replaces the bike. Easy pace, you can chat."],
+      ["Exercise bike", "5 min", "Easy pace, you can chat. Raise the resistance a little in the last minute."],
       ["Leg swings, front to back", "10 per leg", "Hold the cable machine frame for balance."],
       ["Bodyweight squat", "15", "Slow, as deep as is comfortable."],
       ["Glute bridge", "15", "On the mat, one-second squeeze at the top."],
       ["Side-lying clamshell", "15 per side", "Knees bent, feet together, open the top knee."],
-      ["Arm circles, forwards and back", "15 each way", "Replaces the band pull-apart before pressing."]
+      ["Arm circles, forwards and back", "15 each way", "Warms the shoulders before pressing."]
     ],
     exercises: [
       { id: "mon-hipthrust", name: "Barbell hip thrust", equipment: "Bench, barbell, towel or pad", sets: 3, target: 10, unit: "reps", label: "10", rest: 90,
@@ -36,19 +38,19 @@ window.DEFAULT_WORKOUTS = [
         start: "2\u20134 kg per hand",
         cue: "Back supported. If the shoulder pinches, turn palms to face each other." },
       { id: "mon-pushdown", name: "Rope triceps pushdown", equipment: "Cable, high pulley, rope", sets: 2, target: 12, unit: "reps", label: "12", rest: 60,
-        start: "Plate 1\u20132",
-        cue: "Elbows pinned to your sides; only the forearms move." },
+        start: "Plate 1 (about 6 kg)",
+        cue: "Elbows pinned to your sides; only the forearms move. Spread the rope ends apart at the bottom. Too heavy? Do it one arm at a time with the single strap." },
       { id: "mon-crunch", name: "Kneeling cable crunch", equipment: "Cable, high pulley, rope", sets: 2, target: 12, unit: "reps", label: "12", rest: 30,
-        start: "Plate 1\u20132",
-        cue: "Core block: two rounds. Kneel facing the machine, rope beside your head. Curl ribs towards hips; don't pull with the arms." },
-      { id: "mon-deadbug", name: "Dead bug", equipment: "Mat", sets: 2, target: 10, unit: "reps", label: "10 per side", rest: 30,
+        start: "Plate 1 (about 6 kg)",
+        cue: "Core block: two rounds. Kneel facing the machine, rope beside your head. Curl ribs towards hips; don't pull with the arms. Floor crunch if the plate is too heavy." },
+      { id: "mon-deadbug", name: "Dead bug", equipment: "Mat", sets: 2, target: 10, unit: "reps", label: "10 per side", rest: 30, weighted: false,
         start: "Bodyweight",
         cue: "Lower back stays flat on the mat. Shorten the range if it lifts." },
-      { id: "mon-plank", name: "Plank", equipment: "Mat", sets: 2, target: 30, unit: "sec", label: "30\u201345 s", rest: 60,
+      { id: "mon-plank", name: "Plank", equipment: "Mat", sets: 2, target: 30, unit: "sec", label: "30\u201345 s", rest: 60, weighted: false,
         start: "Bodyweight",
-        cue: "Ribs down, glutes squeezed. Stop when the hips start to sag." }
+        cue: "Ribs down, glutes squeezed. Stop when the hips start to sag. Drop to the knees if needed." }
     ],
-    finisher: "Brisk walk, 20 minutes. Pick a route with a hill or stairs; talk-but-not-sing pace.",
+    finisher: "Brisk walk, 20 minutes, with a hill or stairs; talk-but-not-sing pace. Bad weather: 20 minutes on the exercise bike at the same effort.",
     cooldown: "Figure-four glute stretch, half-kneeling hip flexor stretch, hamstring stretch, doorway chest stretch. 20\u201330 s each, no bouncing."
   },
   {
@@ -56,14 +58,14 @@ window.DEFAULT_WORKOUTS = [
     weekday: 2,
     dayLabel: "Tuesday",
     title: "Walk and core",
-    summary: "A brisk walk, then a short core and glute circuit on the mat. About 60\u201370 minutes. Bodyweight, with an optional dumbbell for the bridges.",
+    summary: "A brisk walk (or the bike), then a short core and glute circuit on the mat. About 60\u201370 minutes.",
     warmup: [
-      ["Easy walking", "5 min", "Start of the walk, before you pick up the pace."]
+      ["Easy walking or easy cycling", "5 min", "Start of the walk or ride, before you pick up the pace."]
     ],
     exercises: [
-      { id: "tue-walk", name: "Brisk walk", equipment: "Outdoors", sets: 1, target: 45, unit: "min", label: "45 min", rest: 0, weighted: false,
-        start: "6\u20136.5 km/h on the flat",
-        cue: "Fast enough that you can talk but not sing. Hills or steps make it work like an incline treadmill and bring the glutes in. Bad weather: 40 minutes of stairs or an indoor walking video." },
+      { id: "tue-walk", name: "Brisk walk or bike ride", equipment: "Outdoors, or exercise bike", sets: 1, target: 45, unit: "min", label: "45 min", rest: 0, weighted: false,
+        start: "6\u20136.5 km/h on the flat, or a steady bike effort",
+        cue: "Fast enough that you can talk but not sing. Hills or steps bring the glutes in. Bad weather: 40 minutes on the exercise bike at a resistance where you can still talk." },
       { id: "tue-glutebridge", name: "Glute bridge", equipment: "Mat, 1 dumbbell optional", sets: 3, target: 15, unit: "reps", label: "15", rest: 15,
         start: "Bodyweight, then a dumbbell on the hips",
         cue: "Circuit: three rounds of these four moves, 60 s rest after each round. Drive through the heels, squeeze for one second at the top, ribs down." },
@@ -85,30 +87,33 @@ window.DEFAULT_WORKOUTS = [
     weekday: 3,
     dayLabel: "Wednesday",
     title: "Strength B",
-    summary: "Hinge and pull: the back of the body, glutes and hamstrings. About 75\u201385 minutes.",
+    summary: "Hinge and pull: the back of the body, glutes and hamstrings. About 80\u201390 minutes.",
     warmup: [
-      ["Marching on the spot with arm swings", "4 min", "Easy pace, you can chat."],
+      ["Exercise bike", "5 min", "Easy pace, you can chat."],
       ["Good morning, bodyweight", "12", "Hands on hips, soft knees, push the hips back. Rehearses the deadlift."],
       ["Glute bridge", "15", "One-second squeeze at the top."],
       ["Cat-cow", "10", "Slow, wakes up the spine."],
-      ["Light straight-arm pulldown", "12", "Lightest plate, to warm the upper back before pulling."]
+      ["Light straight-arm pulldown", "12", "Plate 1, to warm the upper back before pulling."]
     ],
     exercises: [
       { id: "wed-rdl", name: "Romanian deadlift", equipment: "Barbell", sets: 3, target: 10, unit: "reps", label: "10", rest: 90,
         start: "Empty bar, or 2 light dumbbells",
         cue: "Soft knees, push the hips back and slide the bar down the thighs until you feel the hamstrings stretch, around mid-shin. Back flat, then drive the hips forward to stand. Squeeze the glutes at the top." },
-      { id: "wed-pulldown", name: "Lat pulldown", equipment: "Cable, high pulley, lat bar", sets: 3, target: 10, unit: "reps", label: "10", rest: 90,
-        start: "Plate 2\u20133",
-        cue: "Kneel, or sit on the bench, facing the machine. Chest up, pull the bar to the top of your chest, elbows down and slightly back. Control it on the way up." },
+      { id: "wed-pulldown", name: "Lat pulldown", equipment: "Cable, high pulley, lat bar, machine seat", sets: 3, target: 10, unit: "reps", label: "10", rest: 90,
+        start: "Plate 2\u20133 (about 9\u201312 kg)",
+        cue: "Sit on the machine seat facing the stack, knees locked under the pads. Hands wide on the bar, chest up, pull to the top of your chest with elbows down and slightly back. Control it on the way up." },
       { id: "wed-sumo", name: "Dumbbell sumo squat", equipment: "1 dumbbell", sets: 3, target: 12, unit: "reps", label: "12", rest: 75,
         start: "6\u20138 kg",
-        cue: "Wide stance, toes turned out, hold one dumbbell between the legs. Sit straight down with knees pushed out over the toes, then squeeze the glutes to stand. Replaces the leg press." },
+        cue: "Wide stance, toes turned out, hold one dumbbell between the legs. Sit straight down with knees pushed out over the toes, then squeeze the glutes to stand." },
       { id: "wed-row", name: "Single-arm dumbbell row", equipment: "Bench, 1 dumbbell", sets: 3, target: 10, unit: "reps", label: "10 per side", rest: 60,
         start: "4\u20136 kg",
-        cue: "One knee and hand on the bench, back flat. Pull the dumbbell towards your hip, elbow close to the body, pause, lower slowly. Replaces the seated cable row." },
-      { id: "wed-slbridge", name: "Single-leg glute bridge", equipment: "Mat", sets: 2, target: 10, unit: "reps", label: "10 per leg", rest: 60, weighted: false,
-        start: "Bodyweight",
-        cue: "One foot planted, the other leg straight or knee hugged in. Drive through the planted heel and keep the hips level. Use both legs if the hips drop." },
+        cue: "One knee and hand on the bench, back flat. Pull the dumbbell towards your hip, elbow close to the body, pause, lower slowly." },
+      { id: "wed-legcurl", name: "Standing leg curl", equipment: "Cable machine, leg station", sets: 2, target: 12, unit: "reps", label: "12 per leg", rest: 60,
+        start: "Plate 1 (about 5 kg)",
+        cue: "Remove the preacher pad first. Stand facing the machine, knee just below the top foam rolls, back of the ankle behind the lower roll. Curl the heel towards your bottom, 3 seconds down. Hips stay still; lighten it if you have to lean forward." },
+      { id: "wed-kickback", name: "Cable glute kickback", equipment: "Cable, low pulley, ankle strap", sets: 2, target: 12, unit: "reps", label: "12 per leg", rest: 60,
+        start: "Plate 1 (about 5 kg)",
+        cue: "Ankle strap on, face the machine and hold the frame, slight forward lean. Push the leg straight back from the hip and squeeze the glute; don't arch the lower back. Too heavy? Do it without the cable first." },
       { id: "wed-lateral", name: "Dumbbell lateral raise", equipment: "2 dumbbells", sets: 2, target: 12, unit: "reps", label: "12", rest: 60,
         start: "1\u20132 kg per hand",
         cue: "Slight bend in the elbows, raise the arms out to shoulder height, little fingers slightly up. No swinging." },
@@ -119,7 +124,7 @@ window.DEFAULT_WORKOUTS = [
         start: "Bodyweight",
         cue: "Lower back stays flat on the mat. Shorten the range if it lifts." }
     ],
-    finisher: "Brisk walk, 20 minutes. A route with a hill or stairs if you can.",
+    finisher: "Brisk walk, 20 minutes, with a hill or stairs if you can. Bad weather: 20 minutes on the exercise bike.",
     cooldown: "Hamstring stretch, figure-four glute stretch, child's pose, doorway chest stretch. 20\u201330 s each, no bouncing."
   },
   {
@@ -127,14 +132,14 @@ window.DEFAULT_WORKOUTS = [
     weekday: 4,
     dayLabel: "Thursday",
     title: "Steady cardio",
-    summary: "A steady walk, plus a few minutes of glute activation. About 50\u201360 minutes. From week 5, swap in intervals.",
+    summary: "A steady walk or bike ride, plus a few minutes of glute activation. About 50\u201360 minutes. From week 5, swap in intervals.",
     warmup: [
-      ["Easy walking", "5 min", "Gradually build the pace."]
+      ["Easy walking or easy cycling", "5 min", "Gradually build the pace."]
     ],
     exercises: [
-      { id: "thu-walk", name: "Steady walk or hill walk", equipment: "Outdoors", sets: 1, target: 40, unit: "min", label: "40 min", rest: 0, weighted: false,
+      { id: "thu-walk", name: "Steady walk, hill walk or bike", equipment: "Outdoors, or exercise bike", sets: 1, target: 40, unit: "min", label: "40 min", rest: 0, weighted: false,
         start: "Conversation pace",
-        cue: "Weeks 1\u20134: a steady pace where you could hold a conversation, with hills if possible. From week 5: after a 5-minute warm-up, do 10 rounds of 1 minute fast uphill or up stairs, then 1 minute easy." },
+        cue: "Weeks 1\u20134: a steady pace where you could hold a conversation, with hills if walking. From week 5: after a 5-minute warm-up, do 10 rounds of 1 minute fast (uphill, stairs, or higher bike resistance), then 1 minute easy. The bike is gentler on the knees for the fast rounds." },
       { id: "thu-clamshell", name: "Side-lying clamshell", equipment: "Mat", sets: 2, target: 15, unit: "reps", label: "15 per side", rest: 30, weighted: false,
         start: "Bodyweight",
         cue: "Knees bent, feet together, open the top knee without rolling the hips back. Light work to keep the glutes switched on before Friday." },
@@ -153,9 +158,9 @@ window.DEFAULT_WORKOUTS = [
     summary: "A long easy walk, hike or cycle. About 60\u201375 minutes. Pick something you enjoy.",
     warmup: [],
     exercises: [
-      { id: "sat-long", name: "Long walk, hike or cycle", equipment: "Outdoors", sets: 1, target: 60, unit: "min", label: "60\u201375 min", rest: 0, weighted: false,
+      { id: "sat-long", name: "Long walk, hike or cycle", equipment: "Outdoors, or exercise bike", sets: 1, target: 60, unit: "min", label: "60\u201375 min", rest: 0, weighted: false,
         start: "Easy, conversation pace",
-        cue: "Low effort, long time. Walk with a friend, explore a trail, or cycle. If you track steps, this day often covers 10,000 on its own." }
+        cue: "Low effort, long time. Walk with a friend, explore a trail, or cycle. Rainy day: the exercise bike with a podcast or show, or split it into two 30-minute rides." }
     ],
     finisher: "",
     cooldown: "Gentle stretches for calves, hamstrings and hips when you get home."
@@ -185,10 +190,10 @@ window.DEFAULT_WORKOUTS = [
     title: "Strength C",
     summary: "Full body with single-leg work. About 75\u201390 minutes.",
     warmup: [
-      ["Marching on the spot with arm swings", "5 min", "Replaces the bike. Light effort, you can chat."],
+      ["Exercise bike", "5 min", "Light effort, you can chat."],
       ["Walking lunge (or static lunge)", "10 per side", "Bodyweight, hold the machine frame if needed."],
       ["Arm circles, forwards and back", "15 each way", "Small circles growing bigger."],
-      ["Cable external rotation", "15 per side", "Lightest plate, elbow tucked, rotate the hand outwards."],
+      ["Side-lying dumbbell external rotation", "15 per side", "Lightest dumbbell, elbow tucked to your side, rotate the forearm up."],
       ["Glute bridge", "15", "On the mat, one-second squeeze at the top."]
     ],
     exercises: [
@@ -201,20 +206,23 @@ window.DEFAULT_WORKOUTS = [
       { id: "fri-stepup", name: "Step-up", equipment: "Bench or sturdy step", sets: 3, target: 10, unit: "reps", label: "10 per leg", rest: 90,
         start: "Bodyweight",
         cue: "Drive through the top foot; don't push off the bottom one. If the bench is above knee height, use a lower step." },
+      { id: "fri-abduction", name: "Cable hip abduction", equipment: "Cable, low pulley, ankle strap", sets: 2, target: 12, unit: "reps", label: "12 per leg", rest: 60,
+        start: "Plate 1 (about 5 kg)",
+        cue: "Strap on the outside leg, stand side-on to the machine holding the frame. Lift the leg out to the side from the hip, toes facing forward, without leaning away. Too heavy? Side-lying leg raises on the mat instead." },
       { id: "fri-sapd", name: "Straight-arm pulldown", equipment: "Cable, high pulley, lat bar", sets: 3, target: 12, unit: "reps", label: "12", rest: 60,
-        start: "Plate 1\u20132",
+        start: "Plate 1\u20132 (about 6\u20139 kg)",
         cue: "Arms almost straight, pull the bar down to your thighs. Feel it under the armpits." },
       { id: "fri-facepull", name: "Face pull", equipment: "Cable, high pulley, rope", sets: 3, target: 15, unit: "reps", label: "15", rest: 60,
-        start: "Plate 1",
-        cue: "Step back, pull towards your forehead with elbows high and wide. Squeeze shoulder blades together." },
+        start: "Plate 1 (about 6 kg)",
+        cue: "Step back, pull the rope towards your forehead with elbows high and wide, hands pulling apart. Squeeze the shoulder blades together. Shoulder pinches? Do bent-over dumbbell reverse flies with 1\u20132 kg." },
       { id: "fri-curl", name: "Dumbbell biceps curl", equipment: "2 dumbbells", sets: 2, target: 12, unit: "reps", label: "12", rest: 60,
         start: "2\u20134 kg per hand",
         cue: "Elbows pinned to your sides, no swinging." },
-      { id: "fri-sideplank", name: "Side plank", equipment: "Mat", sets: 3, target: 20, unit: "sec", label: "20\u201330 s per side", rest: 45,
+      { id: "fri-sideplank", name: "Side plank", equipment: "Mat", sets: 3, target: 20, unit: "sec", label: "20\u201330 s per side", rest: 45, weighted: false,
         start: "Bodyweight",
         cue: "Hips stacked and lifted. Start from your knees if the full version is too hard." }
     ],
-    finisher: "Brisk walk, 20 minutes. A route with a hill if you can.",
+    finisher: "Brisk walk, 20 minutes, with a hill if you can. Bad weather: 20 minutes on the exercise bike.",
     cooldown: "Hip flexor, hamstring, chest and calf stretches. 15\u201330 s each, 2 rounds."
   }
 ];
