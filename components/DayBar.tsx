@@ -16,6 +16,7 @@ export function DayBar() {
             role="tab"
             aria-selected={w.id === workout.id}
             aria-label={name}
+            data-tint={w.weekday}
             className={isToday(w, today) ? "is-today" : undefined}
             onClick={() => selectDay(w.id)}
           >

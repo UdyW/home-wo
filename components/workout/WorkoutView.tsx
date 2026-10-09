@@ -22,18 +22,18 @@ function Hero({ w, children }: { w: Workout; children?: React.ReactNode }) {
 function RestDay({ w, workouts }: { w: Workout; workouts: Workout[] }) {
   const next = orderedWorkouts(workouts).find((x) => !x.restDay && x.exercises.length);
   return (
-    <>
+    <div data-tint={w.weekday}>
       <Hero w={w} />
       {w.warmup?.length > 0 && (
-        <div className="closing">
-          <p><b>Gentle options for today</b></p>
+        <details className="block" open>
+          <summary className="row-toggle">Gentle options for today</summary>
           <WarmupList items={w.warmup} />
-        </div>
+        </details>
       )}
       {next && (
         <p className="empty">Nothing to log today. Your week starts again with {next.dayLabel} {next.title}.</p>
       )}
-    </>
+    </div>
   );
 }
 
@@ -66,17 +66,18 @@ export function WorkoutView() {
   };
 
   return (
-    <>
+    // data-tint gives the page this day's colour (see "Day colours" in globals.css)
+    <div data-tint={w.weekday}>
       <Hero w={w}>
         <div className="meter" aria-hidden="true">
           {allSets.map((s, i) => <i key={i} className={s.done ? "on" : ""} />)}
         </div>
-        <p className="count">{doneCount} of {allSets.length} sets done</p>
+        <p className="count"><b>{doneCount}</b> of {allSets.length} sets done</p>
       </Hero>
 
       {w.warmup?.length > 0 && (
         <details className="block">
-          <summary>Warm-up</summary>
+          <summary className="row-toggle">Warm-up</summary>
           <WarmupList items={w.warmup} />
         </details>
       )}
@@ -114,10 +115,10 @@ export function WorkoutView() {
           <textarea value={draft.notes} onChange={(e) => saveDraft({ ...draft, notes: e.target.value })} />
         </label>
       </div>
-      <div className="actions">
-        <button className="btn primary" onClick={finish}>Finish and save session</button>
-        <button className="btn danger" onClick={discard}>Clear today’s entries</button>
+      <div className="actions stack">
+        <button className="btn primary large" onClick={finish}>Finish and save session</button>
+        <button className="btn plain danger" onClick={discard}>Clear today’s entries</button>
       </div>
-    </>
+    </div>
   );
 }

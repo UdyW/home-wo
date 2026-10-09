@@ -6,30 +6,33 @@ import { Sparkline } from "./Sparkline";
 
 function Progress({ oldestFirst }: { oldestFirst: Session[] }) {
   const { data } = useStore();
+  const rows = data.workouts.flatMap((w) =>
+    w.exercises.map((ex) => {
+      const vals = topWeights(ex.id, oldestFirst);
+      if (!vals.length) return null;
+      const vs = vals.slice(-12);
+      const diff = vs[vs.length - 1] - vs[0];
+      return (
+        <div className="trend" key={ex.id} data-tint={w.weekday}>
+          <div>
+            {ex.name}
+            <small>{w.dayLabel}, {vals.length} session{vals.length > 1 ? "s" : ""}</small>
+          </div>
+          <Sparkline values={vs} />
+          <div className="val">
+            {vs[vs.length - 1]} kg
+            <small>{diff > 0 ? "+" + diff : diff === 0 ? "same" : diff}</small>
+          </div>
+        </div>
+      );
+    }),
+  ).filter(Boolean);
   return (
     <>
       <h2 className="section">Progress</h2>
-      {data.workouts.flatMap((w) =>
-        w.exercises.map((ex) => {
-          const vals = topWeights(ex.id, oldestFirst);
-          if (!vals.length) return null;
-          const vs = vals.slice(-12);
-          const diff = vs[vs.length - 1] - vs[0];
-          return (
-            <div className="trend" key={ex.id}>
-              <div>
-                {ex.name}
-                <small>{w.dayLabel}, {vals.length} session{vals.length > 1 ? "s" : ""}</small>
-              </div>
-              <Sparkline values={vs} />
-              <div className="val">
-                {vs[vs.length - 1]} kg
-                <small>{diff > 0 ? "+" + diff : diff === 0 ? "same" : diff}</small>
-              </div>
-            </div>
-          );
-        }),
-      )}
+      {rows.length
+        ? <div className="group">{rows}</div>
+        : <p className="empty">Log a weight in kg and your progress will show here.</p>}
     </>
   );
 }
@@ -38,8 +41,8 @@ function SessionItem({ s, onDelete }: { s: Session; onDelete(): void }) {
   const count = Object.values(s.entries).reduce((n, sets) => n + sets.filter((x) => x.done).length, 0);
   return (
     <details className="session">
-      <summary>
-        <b>{fmtDate(s.date)}</b> {s.title} <span>({count} sets)</span>
+      <summary className="row-toggle">
+        <span className="what"><b>{fmtDate(s.date)}</b> {s.title} <span>({count} sets)</span></span>
       </summary>
       <ul>
         {Object.entries(s.entries).map(([exId, sets]) => {
@@ -72,13 +75,15 @@ export function HistoryView() {
     <>
       <Progress oldestFirst={sessions.slice().reverse()} />
       <h2 className="section">Sessions</h2>
-      {sessions.map((s) => (
-        <SessionItem
-          key={s.id}
-          s={s}
-          onDelete={() => { if (confirm("Delete this session from your history?")) deleteSession(s.id); }}
-        />
-      ))}
+      <div className="group">
+        {sessions.map((s) => (
+          <SessionItem
+            key={s.id}
+            s={s}
+            onDelete={() => { if (confirm("Delete this session from your history?")) deleteSession(s.id); }}
+          />
+        ))}
+      </div>
     </>
   );
 }
