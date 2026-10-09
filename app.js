@@ -279,8 +279,41 @@
 
   // ---------- timer ----------
   var tEnd = 0, tTotal = 0, tInt = null, tHide = null;
+  var audio = null, swReg = null;
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    navigator.serviceWorker.register("sw.js").then(function (r) { swReg = r; }).catch(function () {});
+  }
+  // Called from a tap, because phones only allow sound and permission prompts after one.
+  function prepareAlerts() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!audio && AC) audio = new AC();
+    if (audio && audio.state === "suspended") audio.resume();
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }
+  function beep() {
+    if (!audio) return;
+    var now = audio.currentTime;
+    [0, 0.3, 0.6].forEach(function (d) {
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.type = "square"; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, now + d);
+      g.gain.exponentialRampToValueAtTime(0.3, now + d + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.2);
+      o.connect(g); g.connect(audio.destination);
+      o.start(now + d); o.stop(now + d + 0.22);
+    });
+  }
+  function notifyDone() {
+    if (!document.hidden || !("Notification" in window) || Notification.permission !== "granted") return;
+    var opts = { body: "Rest done. Time for your next set.", tag: "rest-timer", renotify: true };
+    if (swReg) swReg.showNotification("Home gym log", opts);
+    else { try { new Notification("Home gym log", opts); } catch (e) { /* not supported here */ } }
+  }
   function startTimer(sec) {
     sec = Number(sec); if (!sec) return;
+    prepareAlerts();
     clearTimeout(tHide);
     tTotal = sec; tEnd = Date.now() + sec * 1000;
     $("#timer").hidden = false; $("#tlabel").textContent = "Rest";
@@ -291,16 +324,21 @@
     $("#tleft").textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
     $("#tfill").style.width = (100 - (left / tTotal) * 100) + "%";
     if (left <= 0) {
-      clearInterval(tInt);
+      clearInterval(tInt); tInt = null;
       $("#tlabel").textContent = "Rest done. Next set";
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      beep(); notifyDone();
       tHide = setTimeout(function () { $("#timer").hidden = true; }, 5000);
     }
   }
+  // Phones pause the page in the background; finish the timer as soon as it's back.
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && tInt) tick();
+  });
   $("#timer").addEventListener("click", function (e) {
     var t = e.target.dataset.t;
     if (t === "add") { tEnd += 15000; tTotal += 15; clearInterval(tInt); clearTimeout(tHide); tInt = setInterval(tick, 250); tick(); }
-    if (t === "skip") { clearInterval(tInt); $("#timer").hidden = true; }
+    if (t === "skip") { clearInterval(tInt); tInt = null; $("#timer").hidden = true; }
   });
 
   var toastT;

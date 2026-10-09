@@ -9,4 +9,5 @@ services:
       - ./styles.css:/usr/share/nginx/html/styles.css:ro
       - ./app.js:/usr/share/nginx/html/app.js:ro
       - ./data.js:/usr/share/nginx/html/data.js:ro
+      - ./sw.js:/usr/share/nginx/html/sw.js:ro
       - ./images:/usr/share/nginx/html/images:ro
