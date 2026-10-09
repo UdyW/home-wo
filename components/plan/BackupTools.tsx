@@ -24,7 +24,7 @@ export function BackupTools() {
     if (!file) return;
     let backup: unknown;
     try { backup = JSON.parse(await file.text()); } catch { backup = null; }
-    if (!isBackup(backup)) { toast("That file isn't a Home gym log backup."); return; }
+    if (!isBackup(backup)) { toast("That file isn't a home gym log backup."); return; }
     if (!confirm("Replace everything on this device with the backup?")) return;
     try {
       await importBackup(backup);

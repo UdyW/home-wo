@@ -13,7 +13,7 @@ export function Header() {
   const path = usePathname();
   return (
     <header className="top">
-      <h1>Home gym log</h1>
+      <h1>Pram's home gym log</h1>
       <nav className="views" aria-label="Sections">
         {PAGES.map((p) => (
           <Link key={p.href} href={p.href} aria-current={path === p.href ? "page" : undefined}>

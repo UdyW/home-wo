@@ -9,7 +9,7 @@ const text = Atkinson_Hyperlegible({ subsets: ["latin"], weight: ["400", "700"],
 const display = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-display" });
 
 export const metadata: Metadata = {
-  title: "Home gym log",
+  title: "Pram's home gym log",
   description: "Log your home strength workouts, rest timers and progress.",
 };
 
