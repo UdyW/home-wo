@@ -72,9 +72,13 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
   return (
     <TimerContext.Provider value={start}>
       {children}
-      <div className="timer" hidden={!shown}>
-        <div className="timer-bar"><span style={{ width: fill + "%" }} /></div>
+      {/* Always rendered so it can slide in and out; hidden from touch and screen readers while away. */}
+      <div className={"timer" + (shown ? " show" : "") + (done ? " done" : "")} aria-hidden={!shown}>
         <div className="timer-row">
+          <svg className="ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle className="track" cx="22" cy="22" r="19" />
+            <circle className="fill" cx="22" cy="22" r="19" pathLength={100} strokeDasharray={100} strokeDashoffset={100 - fill} />
+          </svg>
           <p>
             <span>{done ? "Rest done. Next set" : "Rest"}</span>{" "}
             <strong>{Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0")}</strong>

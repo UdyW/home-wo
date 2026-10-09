@@ -60,32 +60,34 @@ export function PlanView() {
   return (
     <>
       <h2 className="section">Edit {w.dayLabel}</h2>
-      <div className="grid">
-        <TextField label="Day name" value={w.dayLabel} onChange={(dayLabel) => update({ dayLabel })} />
-        <TextField label="Title" value={w.title} onChange={(title) => update({ title })} />
-        <SelectField
-          label="Opens automatically on"
-          value={String(w.weekday)}
-          options={[["", "No day"], ...WEEKDAYS.map((d, i): [string, string] => [String(i), d])]}
-          onChange={(v) => update({ weekday: v === "" ? "" : Number(v) })}
+      <div className="card">
+        <div className="grid">
+          <TextField label="Day name" value={w.dayLabel} onChange={(dayLabel) => update({ dayLabel })} />
+          <TextField label="Title" value={w.title} onChange={(title) => update({ title })} />
+          <SelectField
+            label="Opens automatically on"
+            value={String(w.weekday)}
+            options={[["", "No day"], ...WEEKDAYS.map((d, i): [string, string] => [String(i), d])]}
+            onChange={(v) => update({ weekday: v === "" ? "" : Number(v) })}
+          />
+          <SelectField
+            label="Type of day"
+            value={w.restDay ? "yes" : "no"}
+            options={[["no", "Training day"], ["yes", "Rest day (nothing to log)"]]}
+            onChange={(v) => update({ restDay: v === "yes" })}
+          />
+        </div>
+        <TextField label="Summary" value={w.summary} onChange={(summary) => update({ summary })} />
+        <CommitField
+          key={w.id}
+          label="Warm-up (one per line: movement | amount | note)"
+          value={warmupToText(w.warmup)}
+          onCommit={(v) => update({ warmup: textToWarmup(v) })}
+          multiline
         />
-        <SelectField
-          label="Type of day"
-          value={w.restDay ? "yes" : "no"}
-          options={[["no", "Training day"], ["yes", "Rest day (nothing to log)"]]}
-          onChange={(v) => update({ restDay: v === "yes" })}
-        />
+        <TextField label="Finisher" value={w.finisher} onChange={(finisher) => update({ finisher })} />
+        <TextField label="Cool-down" value={w.cooldown} onChange={(cooldown) => update({ cooldown })} />
       </div>
-      <TextField label="Summary" value={w.summary} onChange={(summary) => update({ summary })} />
-      <CommitField
-        key={w.id}
-        label="Warm-up (one per line: movement | amount | note)"
-        value={warmupToText(w.warmup)}
-        onCommit={(v) => update({ warmup: textToWarmup(v) })}
-        multiline
-      />
-      <TextField label="Finisher" value={w.finisher} onChange={(finisher) => update({ finisher })} />
-      <TextField label="Cool-down" value={w.cooldown} onChange={(cooldown) => update({ cooldown })} />
 
       <h2 className="section">Exercises</h2>
       {w.exercises.map((ex, i) => (

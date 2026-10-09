@@ -35,6 +35,7 @@ function LastTime({ ex, sessions }: { ex: Exercise; sessions: Session[] }) {
 export function ExerciseCard({ ex, num, sets, sessions, onSetChange, onKgDone, onToggle }: Props) {
   const weighted = ex.weighted !== false;
   const unit = unitWord(ex);
+  const complete = sets.length > 0 && sets.every((s) => s.done);
   return (
     <article className="ex">
       <header>
@@ -43,9 +44,11 @@ export function ExerciseCard({ ex, num, sets, sessions, onSetChange, onKgDone, o
           <h3>{ex.name}</h3>
           <p className="meta">
             {ex.sets > 1 ? ex.sets + " × " : ""}{ex.label || ex.target}
-            {Number(ex.rest) ? ", " + ex.rest + " s rest" : ""}. {ex.equipment || ""}
+            {Number(ex.rest) ? " · " + ex.rest + " s rest" : ""}
           </p>
+          {ex.equipment && <p className="equip">{ex.equipment}</p>}
         </div>
+        {complete && <span className="badge">Done</span>}
       </header>
       <LastTime ex={ex} sessions={sessions} />
       <div className="sets">
@@ -84,7 +87,7 @@ export function ExerciseCard({ ex, num, sets, sessions, onSetChange, onKgDone, o
         ))}
       </div>
       <details className="cue">
-        <summary>How to do it</summary>
+        <summary className="row-toggle">How to do it</summary>
         <MovePhotos ex={ex} />
         {ex.cue && <p>{ex.cue}</p>}
         {ex.start && <p><b>Suggested start:</b> {ex.start}</p>}
