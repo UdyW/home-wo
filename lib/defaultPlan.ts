@@ -1,12 +1,14 @@
-// Default plan. Edit in the app (Edit tab) or here before deploying.
+import type { Workout } from "./types";
+
+// Default plan. Edit in the app (Edit plan) or here before deploying.
 // target = number of reps, seconds (unit "sec") or minutes (unit "min"); label = what you see.
 // weighted: false hides the kg box. restDay: true shows a rest-day page with no logging.
 // Bump DEFAULT_PLAN_VERSION when you add new workout days: the app then adds any day
 // whose id it doesn't have yet, without touching days the user already has.
 // Cable machine (MH 90 kg home gym) approximate stack weights, from the manual:
 // high pulley plate 1 = 6 kg, 2 = 9 kg, 3 = 12 kg; low pulley plate 1 = 5 kg, 2 = 9 kg.
-window.DEFAULT_PLAN_VERSION = 2;
-window.DEFAULT_WORKOUTS = [
+export const DEFAULT_PLAN_VERSION = 2;
+export const DEFAULT_WORKOUTS: Workout[] = [
   {
     id: "mon",
     weekday: 1,

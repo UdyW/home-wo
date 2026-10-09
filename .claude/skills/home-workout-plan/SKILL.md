@@ -1,6 +1,6 @@
 ---
 name: home-workout-plan
-description: Rules for designing, revising or adding workouts in the Home gym log app, including the trainee's goals, available home equipment, exercise selection, sets, reps, rest, progression and safety, and how to write them into data.js. Use this whenever the user asks to add or change an exercise, swap equipment, create a new day (such as Wednesday), make a session harder or easier, focus on a body area (glutes, core, belly fat), or edit data.js, even if they don't mention "workout plan".
+description: Rules for designing, revising or adding workouts in the Home gym log app, including the trainee's goals, available home equipment, exercise selection, sets, reps, rest, progression and safety, and how to write them into lib/defaultPlan.ts. Use this whenever the user asks to add or change an exercise, swap equipment, create a new day (such as Wednesday), make a session harder or easier, focus on a body area (glutes, core, belly fat), or edit lib/defaultPlan.ts, even if they don't mention "workout plan".
 ---
 
 # Home workout plan
@@ -18,11 +18,18 @@ How to write and change workouts for this app so they stay safe, consistent with
 - Bench (assume it adjusts to an incline; if unsure, give a flat-bench alternative)
 - Barbell and weight plates
 - Dumbbells
-- MH home gym cable machine with a **high pulley** (rope, lat bar, short bar). Don't assume a low pulley; if an exercise needs one, give an alternative.
-- Exercise mat
-- **No** leg press, treadmill, bike, rower, pull-up bar or resistance bands unless the user says they've bought one.
+- Exercise bike
+- Men's Health 90 kg home gym (multi-gym), 12-plate stack. Stations and attachments:
+  - **High pulley** with rope, lat bar and short bar (pulldowns, pushdowns, face pulls, straight-arm pulldowns, cable crunch)
+  - **Low pulley** with short bar, single strap and **ankle strap** (cable curls, kickbacks, hip abduction and adduction)
+  - Seated **chest press** and **butterfly** (pec fly)
+  - **Leg station**: seated leg extension and standing leg curl
+  - Preacher curl pad, machine seat with thigh pads
+  - Approximate resistance: high pulley plate 1 = 6 kg, 2 = 9 kg, 3 = 12 kg; low pulley plate 1 = 5 kg, 2 = 9 kg. Write `start` as "Plate N (about X kg)".
+- Exercise mat (assumed; a folded towel works for floor moves)
+- **No** leg press, treadmill, rower, pull-up bar or resistance bands unless the user says they've bought one.
 
-Cardio is done outdoors (brisk walking, hills, stairs).
+Cardio is done outdoors (brisk walking, hills, stairs) or on the exercise bike in bad weather.
 
 ## Weekly structure
 
@@ -30,8 +37,8 @@ Cardio is done outdoors (brisk walking, hills, stairs).
 | --- | --- | --- |
 | Monday | `mon` | Strength A: hip thrust first, legs and push, core block |
 | Tuesday | `tue` | 45-minute brisk walk, then a 3-round core and glute circuit |
-| Wednesday | `wed` | Strength B: Romanian deadlift, lat pulldown, sumo squat, dumbbell row, single-leg bridge, lateral raise, core |
-| Thursday | `thu` | 40-minute steady or hill walk (intervals from week 5), light glute activation |
+| Wednesday | `wed` | Strength B: Romanian deadlift, lat pulldown, sumo squat, dumbbell row, leg curl, cable kickback, lateral raise, core |
+| Thursday | `thu` | 40-minute steady walk or bike (intervals from week 5), light glute activation |
 | Friday | `fri` | Strength C: full body and single-leg work |
 | Saturday | `sat` | 60–75-minute long easy walk, hike or cycle |
 | Sunday | `sun` | Rest day (`restDay: true`): gentle walk and stretches, nothing to log |
@@ -66,7 +73,7 @@ Don't describe any exercise as burning belly fat. Spot reduction doesn't work. F
 
 ## Writing it into the app
 
-Add the workout to `window.DEFAULT_WORKOUTS` in `data.js`, using the schema in `AGENTS.md`. Example exercise:
+Add the workout to `DEFAULT_WORKOUTS` in `lib/defaultPlan.ts`, using the schema in `AGENTS.md`. Photos go in `public/images/` as `<exercise id>-1.jpg` and `-2.jpg`. Example exercise:
 
 ```js
 { id: "wed-rdl", name: "Romanian deadlift", equipment: "Barbell", sets: 3, target: 10, unit: "reps", label: "10", rest: 90,
@@ -79,5 +86,5 @@ Checklist:
 1. A new workout gets a short, permanent `id` and the right `weekday` (0 = Sunday ... 6 = Saturday). Increase `DEFAULT_PLAN_VERSION` so it's added to the user's saved plan automatically.
 2. Exercise ids follow `<workoutId>-<slug>` and must not reuse an existing id.
 3. Never change an existing exercise's `id`, because that orphans its history. Edit `name` and other fields instead.
-4. Run `node --check data.js`.
+4. Run `npm run build` (Node 20 or later) to check for typing mistakes.
 5. Tell the user how to get the change onto their phone (see "Important gotcha" in `AGENTS.md`).
