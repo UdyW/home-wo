@@ -25,7 +25,7 @@ export function BackupTools() {
     let backup: unknown;
     try { backup = JSON.parse(await file.text()); } catch { backup = null; }
     if (!isBackup(backup)) { toast("That file isn't a home gym log backup."); return; }
-    if (!confirm("Replace everything on this device with the backup?")) return;
+    if (!confirm("Replace your plan and history in your account with the backup?")) return;
     try {
       await importBackup(backup);
       toast("Backup imported");
@@ -37,7 +37,7 @@ export function BackupTools() {
   return (
     <>
       <p className="empty">
-        Your data lives in this browser only. Export a backup now and then, and import it on another phone or computer.
+        Your plan and history are saved on this device and in your account. Export a backup now and then to keep your own copy.
       </p>
       <div className="actions">
         <button className="btn" onClick={exportBackup}>Export backup</button>
@@ -48,10 +48,10 @@ export function BackupTools() {
         <button
           className="btn danger"
           onClick={() => {
-            if (confirm("Restore the original weekly plan? Your history is kept; your edits to the plan are lost.")) restorePlan();
+            if (confirm("Replace your plan with the example plan? Your history is kept; your plan is lost. Export a backup first.")) restorePlan();
           }}
         >
-          Restore original plan
+          Start from example plan
         </button>
       </div>
     </>

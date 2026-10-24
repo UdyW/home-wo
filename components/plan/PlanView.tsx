@@ -3,6 +3,7 @@ import { useToast } from "@/components/Toast";
 import { newExercise, newWorkout, WEEKDAYS } from "@/lib/plan";
 import { useStore } from "@/lib/store";
 import type { Exercise, WarmupItem, Workout } from "@/lib/types";
+import { AccountTools } from "./AccountTools";
 import { BackupTools } from "./BackupTools";
 import { ExerciseForm } from "./ExerciseForm";
 import { CommitField, SelectField, TextField } from "./Fields";
@@ -110,6 +111,7 @@ export function PlanView() {
         <button className="btn danger" onClick={deleteWorkout}>Delete {w.dayLabel}</button>
       </div>
       <BackupTools />
+      <AccountTools />
     </>
   );
 }
