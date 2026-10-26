@@ -1,7 +1,7 @@
 "use client";
 import { lastEntry, unitWord } from "@/lib/plan";
 import type { Exercise, Session, SetEntry } from "@/lib/types";
-import { MovePhotos } from "./MovePhotos";
+import { MovePhotos, MuscleDiagram } from "./MovePhotos";
 
 interface Props {
   ex: Exercise;
@@ -89,6 +89,7 @@ export function ExerciseCard({ ex, num, sets, sessions, onSetChange, onKgDone, o
       <details className="cue">
         <summary className="row-toggle">How to do it</summary>
         <MovePhotos ex={ex} />
+        <MuscleDiagram ex={ex} />
         {ex.cue && <p>{ex.cue}</p>}
         {ex.start && <p><b>Suggested start:</b> {ex.start}</p>}
       </details>

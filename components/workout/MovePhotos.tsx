@@ -28,3 +28,21 @@ export function MovePhotos({ ex }: { ex: Exercise }) {
     </div>
   );
 }
+
+// Muscle diagram per exercise: public/images/mdiagrams/<exercise id>.png.
+// Hidden if it fails to load, so exercises without one show nothing.
+export function MuscleDiagram({ ex }: { ex: Exercise }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <figure className="mdiagram">
+      <img
+        src={"/images/mdiagrams/" + encodeURIComponent(ex.id) + ".png"}
+        alt={"Muscles worked by " + ex.name.toLowerCase()}
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+      <figcaption>Muscles worked</figcaption>
+    </figure>
+  );
+}
