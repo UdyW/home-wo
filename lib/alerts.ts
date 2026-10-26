@@ -12,7 +12,7 @@ export function registerServiceWorker() {
 }
 
 // Three short beeps as a WAV file made in the browser (no download).
-// An <audio> element still plays when an iPhone's silent switch is on; Web Audio doesn't.
+// Played through an <audio> element, set to mix with other apps' music in prepareAlerts().
 function makeBeepUrl(): string {
   const rate = 22050, n = Math.round(rate * 0.8), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
   const str = (o: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
@@ -29,6 +29,10 @@ function makeBeepUrl(): string {
 
 /** Call from a tap: phones only allow sound, wake lock and permission prompts after one. */
 export function prepareAlerts() {
+  // "ambient" mixes the beep with music from other apps instead of pausing it (Safari 16.4+).
+  // Trade-off: ambient sound follows the iPhone's silent switch.
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  if (session) session.type = "ambient";
   if (!alarm) { alarm = new Audio(makeBeepUrl()); alarm.preload = "auto"; }
   if (!alarmReady) {
     // A silent play inside the tap unlocks the element so it can beep later on its own.
